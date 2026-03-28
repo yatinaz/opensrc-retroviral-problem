@@ -6,7 +6,8 @@
 ![ESM-2](https://img.shields.io/badge/ESM--2-protein%20LM-green)
 ![Status](https://img.shields.io/badge/Status-Submitted-brightgreen)
 
-**LOFO CLS = 0.8034** | PR-AUC = 0.811 | Weighted Spearman = 0.7959
+**LOFO CLS = 0.803** | PR-AUC = 0.811 | Weighted Spearman = 0.796
+**Era 1 (MF1):** Macro-F1 = 0.650 | Retroviral AUC = 0.833 | Retroviral TP = 10/12
 
 ---
 
@@ -77,9 +78,19 @@ final = 0.66 × rank(LR_prob) + 0.34 × rank((XGB + CB) / 2)
 
 ### Full Iteration History
 
-![Iteration History](figures/00_iteration_history.png)
+The project ran through two distinct eras optimising different metrics.
 
-The project went through two distinct metric eras. Versions v1–v7 optimised for **Macro-F1 and Retroviral TP count**. Starting at v8, the evaluation switched to **CLS = harmonic mean of PR-AUC and Weighted Spearman** — the official challenge metric — which exposed that binary classifiers ranked all actives identically (WSpearman ≈ 0), requiring a fundamental redesign.
+#### Era 1 — Binary Classification (v1–v7)
+Optimised for Macro-F1 and Retroviral TP count.
+
+![Era 1 Progression](figures/01_era1_progression.png)
+
+#### Era 2 — CLS Metric (v8–v14)
+Full metric redefinition: CLS = harmonic mean of PR-AUC and Weighted Spearman. Binary classifiers ranked all actives identically (WSpearman ≈ 0), requiring a two-head clf+reg redesign.
+
+![Era 2 Progression](figures/02_era2_progression.png)
+
+> **Single biggest improvement**: fixing ESM-2 PCA leakage in v10 (+0.099 CLS, from 0.677 → 0.776) — larger than all subsequent feature engineering gains combined.
 
 #### Era 1: MF1 / Retroviral TP (v1–v7)
 
@@ -103,7 +114,7 @@ The project went through two distinct metric eras. Versions v1–v7 optimised fo
 | v12/v13 | 0.792 | 0.800 | 0.784 | Systematic sweep of 15+ candidate features |
 | **v14** | **0.803** | **0.811** | **0.796** | `n_strands_total` in CLF; `isoelectric_point` + `n_salt_bridges` in REG; beta=0.66 |
 
-> **Single biggest improvement**: fixing the PCA leakage in v10 (fitting ESM-2 PCA on training data only, inside each fold) accounted for +0.17 CLS — larger than all feature engineering gains combined.
+> **Single biggest improvement**: fixing ESM-2 PCA leakage in v10 (+0.099 CLS, from 0.677 → 0.776) — larger than all subsequent feature engineering gains combined.
 
 ![CLS Progression](figures/cls_progression.png)
 
@@ -156,6 +167,18 @@ A: CLS = 2·PR-AUC·WSpearman / (PR-AUC + WSpearman). PR-AUC rewards finding act
 3. **`thumb_fident`** (the strongest feature, ρ=0.901) is only defined for RTs that have a detectable thumb subdomain. The 17 RTs where it is NaN receive imputed values.
 4. **No experimental augmentation**: homologous protein data or mutational scanning data could substantially improve the model.
 5. **Per-fold CLS varies** — the Retroviral family (the richest in actives) drives most of the overall score.
+
+---
+
+## Connection to Real-World RT Engineering
+
+This challenge directly mirrors problems in industrial enzyme engineering:
+
+- **Small labelled datasets** are the norm — wet-lab screening is expensive and every data point costs real money
+- **Family-level generalisation** is exactly what happens when a company wants to test an RT from a new organism never screened before
+- **The dual objective** (classify + rank) reflects clinical/industrial reality: you need to know what works AND which variant to prioritise
+
+The `thumb_fident` feature (ρ=0.901 with PE efficiency) suggests that **thumb subdomain geometry is the dominant determinant of prime editing activity** — a testable hypothesis that could guide future RT engineering efforts independently of this ML challenge.
 
 ---
 

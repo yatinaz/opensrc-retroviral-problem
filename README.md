@@ -234,11 +234,5 @@ python retroviral_wall_visualisations.py
 
 ---
 
-## Submission
-
-Submitted to Mandrake Bioworks Open Problems #1 as `submission_v14.csv`.
-Challenge deadline: April 30, 2026.
-
 ---
 
-*Built with scikit-learn, XGBoost, CatBoost, ESM-2 embeddings, and FoldSeek structural features.*

@@ -1,0 +1,8 @@
+*.npz
+*.pyc
+__pycache__/
+.ipynb_checkpoints/
+*.egg-info/
+catboost_info/
+*.log
+.DS_Store

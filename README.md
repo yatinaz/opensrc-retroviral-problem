@@ -75,12 +75,35 @@ final = 0.66 × rank(LR_prob) + 0.34 × rank((XGB + CB) / 2)
 
 ## Results
 
-| Version | CLS    | PR-AUC | W.Spearman | Key Addition |
-|---------|--------|--------|------------|--------------|
-| v9      | 0.677  | 0.727  | 0.633      | XGB/CB baseline |
-| v10     | 0.7824 | 0.768  | 0.798      | LR classifier, `thumb_fident`, `n_hairpins_found`, PCA fitted inside fold |
-| v11     | 0.7908 | 0.799  | 0.783      | `hbonds_per_res` added to CLF |
-| **v14** | **0.8034** | **0.811** | **0.7959** | `n_strands_total` in CLF; `isoelectric_point` + `n_salt_bridges` in REG; beta=0.66 |
+### Full Iteration History
+
+![Iteration History](figures/00_iteration_history.png)
+
+The project went through two distinct metric eras. Versions v1–v7 optimised for **Macro-F1 and Retroviral TP count**. Starting at v8, the evaluation switched to **CLS = harmonic mean of PR-AUC and Weighted Spearman** — the official challenge metric — which exposed that binary classifiers ranked all actives identically (WSpearman ≈ 0), requiring a fundamental redesign.
+
+#### Era 1: MF1 / Retroviral TP (v1–v7)
+
+| Stage | Approach | MF1 | Retroviral AUC | Retroviral TP | Key Change |
+|-------|----------|-----|----------------|---------------|------------|
+| v1 | Random Forest + handcrafted features, no ESM-2 | 0.634 | 0.627 | 2/12 | Baseline |
+| v3 | Voting ensemble + ESM-2 variants, threshold tuning | 0.634 | — | 2/12 | First ESM-2 integration |
+| v4 | Isotonic calibration, percentile thresholds | 0.607 | — | 12/12† | †Only at very low threshold with many FPs |
+| v5 | SVM ensemble + MI-30 feature selection | 0.676 | — | — | Best MF1 in this era |
+| v6/v7 | 7-model rank-blend, catalytic-window ESM-2, RNaseH features | **0.650** | **0.833** | **10/12** | Rank averaging introduced; retroviral TPs maximised |
+
+#### Era 2: CLS metric (v8–v14)
+
+| Version | CLS | PR-AUC | W.Spearman | Key Change |
+|---------|-----|--------|------------|------------|
+| v8 (SVR+GBR) | 0.487 | 0.563 | 0.429 | Metric reframe; two-head clf+reg architecture introduced |
+| v8t | 0.613 | 0.765 | 0.433 | Direct TM-score head + GBR blend, beta=0.50 |
+| v9 | 0.677 | 0.727 | 0.633 | XGB+CB clf+reg, full foldseek family TM scores |
+| v10 | 0.776 | 0.768 | 0.798 | **LR replaces tree classifier; `thumb_fident` + `n_hairpins_found`; PCA leakage fixed** |
+| v11 | 0.791 | 0.799 | 0.783 | `hbonds_per_res` added to CLF; regressor additions reverted |
+| v12/v13 | 0.792 | 0.800 | 0.784 | Systematic sweep of 15+ candidate features |
+| **v14** | **0.803** | **0.811** | **0.796** | `n_strands_total` in CLF; `isoelectric_point` + `n_salt_bridges` in REG; beta=0.66 |
+
+> **Single biggest improvement**: fixing the PCA leakage in v10 (fitting ESM-2 PCA on training data only, inside each fold) accounted for +0.17 CLS — larger than all feature engineering gains combined.
 
 ![CLS Progression](figures/cls_progression.png)
 

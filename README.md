@@ -90,7 +90,7 @@ Full metric redefinition: CLS = harmonic mean of PR-AUC and Weighted Spearman. B
 
 ![Era 2 Progression](figures/02_era2_progression.png)
 
-> **Single biggest improvement**: fixing ESM-2 PCA leakage in v10 (+0.099 CLS, from 0.677 → 0.776) — larger than all subsequent feature engineering gains combined.
+> **Single biggest improvement**: switching the classifier from XGBoost/CatBoost to L2 LogisticRegression in v10 (+0.105 CLS, from 0.677 → 0.782) — tree classifiers overfit at n=57 while LR uses all features simultaneously with ridge regularisation.
 
 #### Era 1: MF1 / Retroviral TP (v1–v7)
 
@@ -109,12 +109,12 @@ Full metric redefinition: CLS = harmonic mean of PR-AUC and Weighted Spearman. B
 | v8 (SVR+GBR) | 0.487 | 0.563 | 0.429 | Metric reframe; two-head clf+reg architecture introduced |
 | v8t | 0.613 | 0.765 | 0.433 | Direct TM-score head + GBR blend, beta=0.50 |
 | v9 | 0.677 | 0.727 | 0.633 | XGB+CB clf+reg, full foldseek family TM scores |
-| v10 | 0.776 | 0.768 | 0.798 | **LR replaces tree classifier; `thumb_fident` + `n_hairpins_found`; PCA leakage fixed** |
+| v10 | 0.7824 | 0.768 | 0.798 | **LR replaces tree classifier; `thumb_fident` + `n_hairpins_found`; PCA fitted inside fold** |
 | v11 | 0.791 | 0.799 | 0.783 | `hbonds_per_res` added to CLF; regressor additions reverted |
 | v12/v13 | 0.792 | 0.800 | 0.784 | Systematic sweep of 15+ candidate features |
 | **v14** | **0.803** | **0.811** | **0.796** | `n_strands_total` in CLF; `isoelectric_point` + `n_salt_bridges` in REG; beta=0.66 |
 
-> **Single biggest improvement**: fixing ESM-2 PCA leakage in v10 (+0.099 CLS, from 0.677 → 0.776) — larger than all subsequent feature engineering gains combined.
+> **Single biggest improvement**: switching the classifier from XGBoost/CatBoost to L2 LogisticRegression in v10 (+0.105 CLS, from 0.677 → 0.782) — tree classifiers overfit at n=57 while LR uses all features simultaneously with ridge regularisation.
 
 ![CLS Progression](figures/cls_progression.png)
 
